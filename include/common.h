@@ -5,6 +5,7 @@
 struct Block {
     size_t start;
     size_t size;
+    size_t requested;
     bool free;
     int id;
 };
