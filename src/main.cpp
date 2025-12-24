@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <string>
 #include "common.h"
+#include "cache.h"
 
 using namespace std;
 
@@ -12,6 +13,7 @@ size_t TOTAL_MEMORY=0;
 int next_block_id=1;
 int alloc_requests = 0;
 int alloc_success = 0;
+CacheSystem cache;
 enum AllocatorType { FIRST_FIT, BEST_FIT, WORST_FIT };
 AllocatorType current_allocator = FIRST_FIT;
 
@@ -301,6 +303,16 @@ int main()
         else if(command=="stats")
         {
             stats();
+        }
+        else if(command == "access")
+        {
+            size_t address;
+            cin >> hex >> address >> dec;
+            cache.access(address);
+        }
+        else if(command=="cache_stats")
+        {
+            cache.stats();
         }
         else
         {
