@@ -3,8 +3,8 @@
 
 using namespace std;
 
-VirtualMemory::VirtualMemory(int frames, int ps)
-    : num_frames(frames), page_size(ps)
+VirtualMemory::VirtualMemory(int frames, int ps, PageReplacement p)
+    : num_frames(frames), page_size(ps), policy(p), clock_hand(0)
 {
     page_table.resize(256);
     frame_to_page.resize(frames, -1);
@@ -13,6 +13,7 @@ VirtualMemory::VirtualMemory(int frames, int ps)
         pte.valid = false;
         pte.frame = -1;
         pte.fifo_order = 0;
+        pte.reference = false;
     }
 }
 
@@ -23,6 +24,7 @@ size_t VirtualMemory::translate(size_t virtual_address)
 
     if (page_table[page].valid) {
         page_hits++;
+        page_table[page].reference = true;
         return page_table[page].frame * page_size + offset;
     }
 
@@ -40,8 +42,26 @@ size_t VirtualMemory::translate(size_t virtual_address)
         }
     }
 
+    if (frame == -1 && policy == CLOCK_REPL) 
+    {
+        while (true) 
+        {
+            int victim_page = frame_to_page[clock_hand];
+
+            if (!page_table[victim_page].reference) 
+            {
+                frame = clock_hand;
+                page_table[victim_page].valid = false;
+                break;
+            }
+
+            page_table[victim_page].reference = false;
+            clock_hand = (clock_hand + 1) % num_frames;
+        }
+    }
+
     // FIFO replacement
-    if (frame == -1) {
+    if (frame == -1 && policy == FIFO_REPL) {
         int victim_page = -1;
         int oldest = 1e9;
 
@@ -59,6 +79,7 @@ size_t VirtualMemory::translate(size_t virtual_address)
     page_table[page].valid = true;
     page_table[page].frame = frame;
     page_table[page].fifo_order = fifo_tick;
+    page_table[page].reference = true;
     frame_to_page[frame] = page;
 
     return frame * page_size + offset;
