@@ -94,4 +94,5 @@ void VirtualMemory::stats()
     cout << "Page faults: " << page_faults << endl;
     cout << "Disk accesses: " << disk_accesses << endl;
     cout << "Simulated disk latency per fault: "<< DISK_LATENCY << " cycles" << endl;
+    cout << "Page fault rate: " << fault_rate()<<endl;
 }

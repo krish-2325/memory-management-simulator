@@ -14,6 +14,7 @@ CacheSystem cache(64, 1, 256, 2, 1024, 4); // CacheSystem(L1_size, L1_assoc, L2_
 VirtualMemory vm(8,256,CLOCK_REPL);
 BuddyAllocator buddy(1024, 16);
 bool use_buddy = false;
+int total_memory_accesses = 0;
 AllocatorType current_allocator = FIRST_FIT;
 
 int main()
@@ -94,6 +95,7 @@ int main()
         else if(command == "access")
         {
             size_t vaddr;
+            total_memory_accesses++;
             cin >> hex >> vaddr >> dec;
             size_t paddr = vm.translate(vaddr);
             cache.access(paddr);
@@ -115,6 +117,13 @@ int main()
             size_t addr, size;
             cin >> hex >> addr >> dec >> size;
             buddy.free_block(addr, size);
+        }
+        else if (command == "summary") 
+        {
+            cout << "\n--- System Summary ---\n";
+            cout << "Total memory accesses: " << total_memory_accesses << endl;
+            cache.stats();
+            vm.stats();
         }
         else
         {

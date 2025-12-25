@@ -33,6 +33,11 @@ public:
     CacheLevel(int size, int block_size, int associativity, CachePolicy policy);
 
     bool access(size_t address);
+    double hit_ratio() const 
+    {
+        int total = hits + misses;
+        return total == 0 ? 0.0 : (double)hits / total * 100.0;
+    }
 };
 
 class CacheSystem {

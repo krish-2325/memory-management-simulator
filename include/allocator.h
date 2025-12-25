@@ -13,6 +13,7 @@ extern size_t TOTAL_MEMORY;
 extern int alloc_requests;
 extern int alloc_success;
 extern int next_block_id;
+extern int total_memory_accesses;
 
 // allocator API
 void init_memory(size_t size);

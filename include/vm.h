@@ -33,6 +33,11 @@ public:
     int page_hits = 0;
 
     VirtualMemory(int frames, int page_size, PageReplacement policy);
+    double fault_rate() const 
+    {
+        int total = page_hits + page_faults;
+        return total == 0 ? 0.0 : (double)page_faults / total * 100.0;
+    }
 
     size_t translate(size_t virtual_address);
     void stats();
