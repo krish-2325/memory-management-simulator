@@ -8,6 +8,7 @@ VirtualMemory::VirtualMemory(int frames, int ps, PageReplacement p)
 {
     page_table.resize(256);
     frame_to_page.resize(frames, -1);
+    disk_accesses = 0;
 
     for (auto &pte : page_table) {
         pte.valid = false;
@@ -30,6 +31,7 @@ size_t VirtualMemory::translate(size_t virtual_address)
 
     // PAGE FAULT
     page_faults++;
+    disk_accesses++;
     fifo_tick++;
 
     int frame = -1;
@@ -90,4 +92,6 @@ void VirtualMemory::stats()
     cout << "\n--- Virtual Memory Stats ---\n";
     cout << "Page hits: " << page_hits << endl;
     cout << "Page faults: " << page_faults << endl;
+    cout << "Disk accesses: " << disk_accesses << endl;
+    cout << "Simulated disk latency per fault: "<< DISK_LATENCY << " cycles" << endl;
 }

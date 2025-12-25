@@ -22,6 +22,8 @@ public:
     int num_frames;
     PageReplacement policy;
     int clock_hand;
+    int disk_accesses;
+    const int DISK_LATENCY = 100;
 
     std::vector<PageTableEntry> page_table;
     std::vector<int> frame_to_page;
