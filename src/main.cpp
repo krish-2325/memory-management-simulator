@@ -5,6 +5,7 @@
 #include "common.h"
 #include "cache.h"
 #include "vm.h"
+#include "buddy.h"
 
 using namespace std;
 
@@ -16,6 +17,8 @@ int alloc_requests = 0;
 int alloc_success = 0;
 CacheSystem cache;
 VirtualMemory vm(8,256);
+BuddyAllocator buddy(1024, 16);
+bool use_buddy = false;
 enum AllocatorType { FIRST_FIT, BEST_FIT, WORST_FIT };
 AllocatorType current_allocator = FIRST_FIT;
 
@@ -72,7 +75,8 @@ void malloc_first_fit(size_t request_size)
     cout<<"Allocation failed: Not enough memory\n";
 }
 
-void malloc_best_fit(size_t size) {
+void malloc_best_fit(size_t size) 
+{
     auto best = memory_blocks.end();
     alloc_requests++;
 
@@ -96,9 +100,11 @@ void malloc_best_fit(size_t size) {
     alloc.id = next_block_id++;
     alloc_success++;
 
+    size_t original_size = best->size;
     best = memory_blocks.erase(best);
     memory_blocks.insert(best, alloc);
-    size_t remaining = best->size - size;
+    size_t remaining = original_size - size;
+
     if (remaining > 0) {
         Block rem;
         rem.start = alloc.start + size;
@@ -113,7 +119,8 @@ void malloc_best_fit(size_t size) {
          << hex << alloc.start << dec << "\n";
 }
 
-void malloc_worst_fit(size_t size) {
+void malloc_worst_fit(size_t size) 
+{
     auto worst = memory_blocks.end();
     alloc_requests++;
 
@@ -276,12 +283,16 @@ int main()
         {
             size_t size;
             cin >> size;
-            if (current_allocator == FIRST_FIT)
-                malloc_first_fit(size);
-            else if (current_allocator == BEST_FIT)
-                malloc_best_fit(size);
-            else if (current_allocator == WORST_FIT)
-                malloc_worst_fit(size);
+            if (use_buddy) {
+                buddy.allocate(size);
+            } else {
+                if (current_allocator == FIRST_FIT)
+                    malloc_first_fit(size);
+                else if (current_allocator == BEST_FIT)
+                    malloc_best_fit(size);
+                else
+                    malloc_worst_fit(size);
+            }
         }
         else if (command == "free") {
             int id;
@@ -292,14 +303,28 @@ int main()
         {
             string temp, type;
             cin>>temp>>type;
-            if(type=="first_fit")
-                current_allocator=FIRST_FIT;
-            else if(type=="best_fit")
-                current_allocator=BEST_FIT;
-            else if(type=="worst_fit")
-                current_allocator=WORST_FIT;
-            else
-                cout<<"Unknown allocator type\n";
+            if (type == "first_fit") 
+            {
+                use_buddy = false;
+                current_allocator = FIRST_FIT;
+            }
+            else if (type == "best_fit") \
+            {
+                use_buddy = false;
+                current_allocator = BEST_FIT;
+            }
+            else if (type == "worst_fit") 
+            {
+                use_buddy = false;
+                current_allocator = WORST_FIT;
+            }
+            else if (type == "buddy") 
+            {
+                use_buddy = true;
+            }
+            else {
+                cout << "Unknown allocator type\n";
+            }
             cout<<"Allocator set to "<<type<<endl;
         }
         else if(command=="stats")
@@ -320,6 +345,16 @@ int main()
         else if(command=="vm_stats")
         {
             vm.stats();
+        }
+        else if (command == "buddy_dump") 
+        {
+            buddy.dump();
+        }
+        else if (command == "buddy_free") 
+        {
+            size_t addr, size;
+            cin >> hex >> addr >> dec >> size;
+            buddy.free_block(addr, size);
         }
         else
         {
