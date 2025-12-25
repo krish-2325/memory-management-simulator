@@ -40,6 +40,8 @@ public:
     }
 
     size_t translate(size_t virtual_address);
+    size_t get_virtual_memory_size() const;
+    size_t get_page_size() const;
     void stats();
 };
 

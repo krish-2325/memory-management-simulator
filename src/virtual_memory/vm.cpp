@@ -28,7 +28,11 @@ size_t VirtualMemory::translate(size_t virtual_address)
         page_table[page].reference = true;
         return page_table[page].frame * page_size + offset;
     }
-
+    if (page >= page_table.size())
+    {
+        cout << "Segmentation fault: invalid page access\n";
+        return 0;
+    }
     // PAGE FAULT
     page_faults++;
     disk_accesses++;
@@ -85,6 +89,16 @@ size_t VirtualMemory::translate(size_t virtual_address)
     frame_to_page[frame] = page;
 
     return frame * page_size + offset;
+}
+
+size_t VirtualMemory::get_virtual_memory_size() const
+{
+    return page_table.size() * page_size;
+}
+
+size_t VirtualMemory::get_page_size() const
+{
+    return page_size;
 }
 
 void VirtualMemory::stats()

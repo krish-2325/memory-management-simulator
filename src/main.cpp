@@ -130,6 +130,14 @@ int main()
         {
             size_t vaddr;
             cin >> hex >> vaddr >> dec;
+            size_t vmem_size = vm.get_virtual_memory_size();
+            if (vaddr >= vmem_size)
+            {
+                cout << "Invalid virtual address 0x"
+                    << hex << vaddr << dec
+                    << " (out of range)\n";
+                continue;
+            }
             total_memory_accesses++;
             size_t paddr = vm.translate(vaddr);
             cache.access(paddr);
