@@ -63,6 +63,22 @@ void free_block(int id)
     }
     cout<<"No allocated block with id = "<<id<<endl;
 }
+
+void free_by_address(size_t address)
+{
+    for (auto it = memory_blocks.begin(); it != memory_blocks.end(); ++it)
+    {
+        if (!it->free && it->start == address)
+        {
+            int id = it->id;
+            free_block(id);
+            return;
+        }
+    }
+    cout << "No allocated block starts at address 0x"
+         << hex << address << dec << endl;
+}
+
 //Dump memory layout 
 void dump_memory()
 {

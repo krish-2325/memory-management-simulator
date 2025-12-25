@@ -21,6 +21,7 @@ void malloc_first_fit(size_t size);
 void malloc_best_fit(size_t size);
 void malloc_worst_fit(size_t size);
 void free_block(int id);
+void free_by_address(size_t address);
 void dump_memory();
 void stats();
 

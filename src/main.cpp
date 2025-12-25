@@ -55,10 +55,18 @@ int main()
                     malloc_worst_fit(size);
             }
         }
-        else if (command == "free") {
-            int id;
-            cin >> id;
-            free_block(id);
+       else if (command == "free") 
+       {
+            string arg;
+            cin >> arg;
+
+            if (arg.find("0x") == 0 || arg.find("0X") == 0) {
+                size_t address = stoul(arg, nullptr, 16);
+                free_by_address(address);
+            } else {
+                int id = stoi(arg);
+                free_block(id);
+            }
         }
         else if (command == "set")
         {

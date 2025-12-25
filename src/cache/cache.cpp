@@ -92,7 +92,7 @@ void CacheSystem::access(size_t address)
 void CacheSystem::stats()
 {
     cout << "\n--- Cache Statistics ---\n";
-    cout << "L1 Hits: " << L1.hits << " Misses: " << L1.misses << endl;
-    cout << "L2 Hits: " << L2.hits << " Misses: " << L2.misses << endl;
-    cout << "L3 Hits: " << L3.hits << " Misses: " << L3.misses << endl;
+    cout << "L1 Hits: " << L1.hits << " Misses: " << L1.misses << "L1 Hit Ratio: " << L1.hit_ratio() << endl;
+    cout << "L2 Hits: " << L2.hits << " Misses: " << L2.misses << "L2 Hit Ratio: " << L2.hit_ratio() << endl;
+    cout << "L3 Hits: " << L3.hits << " Misses: " << L3.misses << "L3 Hit Ratio: " << L3.hit_ratio() << endl;
 }
