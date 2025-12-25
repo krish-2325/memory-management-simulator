@@ -49,6 +49,7 @@ public:
     CacheSystem(int l1_size, int l1_assoc, int l2_size, int l2_assoc, int l3_size, int l3_assoc);
 
     void access(size_t address);
+    void reinit(int l1_size, int l1_assoc, int l2_size, int l2_assoc, int l3_size, int l3_assoc);
     void stats();
 };
 

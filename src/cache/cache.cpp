@@ -96,3 +96,14 @@ void CacheSystem::stats()
     cout << "L2 Hits: " << L2.hits << " Misses: " << L2.misses << "L2 Hit Ratio: " << L2.hit_ratio() << endl;
     cout << "L3 Hits: " << L3.hits << " Misses: " << L3.misses << "L3 Hit Ratio: " << L3.hit_ratio() << endl;
 }
+
+void CacheSystem::reinit(int l1_size, int l1_assoc,
+                         int l2_size, int l2_assoc,
+                         int l3_size, int l3_assoc)
+{
+    L1 = CacheLevel(l1_size, 16, l1_assoc, LRU);
+    L2 = CacheLevel(l2_size, 16, l2_assoc, FIFO);
+    L3 = CacheLevel(l3_size, 16, l3_assoc, FIFO);
+
+    cout << "Cache hierarchy reinitialized\n";
+}

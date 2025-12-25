@@ -10,7 +10,11 @@
 
 using namespace std;
 
-CacheSystem cache(64, 1, 256, 2, 1024, 4); // CacheSystem(L1_size, L1_assoc, L2_size, L2_assoc)
+int l1_size = 64, l1_assoc = 1;
+int l2_size = 256, l2_assoc = 2;
+int l3_size = 1024, l3_assoc = 4;
+
+CacheSystem cache(l1_size, l1_assoc, l2_size, l2_assoc, l3_size, l3_assoc); // CacheSystem(L1_size, L1_assoc, L2_size, L2_assoc)
 VirtualMemory vm(8,256,CLOCK_REPL);
 BuddyAllocator buddy(1024, 16);
 bool use_buddy = false;
@@ -55,46 +59,68 @@ int main()
                     malloc_worst_fit(size);
             }
         }
-       else if (command == "free") 
-       {
-            string arg;
-            cin >> arg;
+        else if (command == "free") 
+        {
+                string arg;
+                cin >> arg;
 
-            if (arg.find("0x") == 0 || arg.find("0X") == 0) {
-                size_t address = stoul(arg, nullptr, 16);
-                free_by_address(address);
-            } else {
-                int id = stoi(arg);
-                free_block(id);
-            }
+                if (arg.find("0x") == 0 || arg.find("0X") == 0) {
+                    size_t address = stoul(arg, nullptr, 16);
+                    free_by_address(address);
+                } else {
+                    int id = stoi(arg);
+                    free_block(id);
+                }
         }
         else if (command == "set")
         {
-            string temp, type;
-            cin>>temp>>type;
-            if (type == "first_fit") 
+            string target;
+            cin >> target;
+
+            if (target == "cache")
             {
-                use_buddy = false;
-                current_allocator = FIRST_FIT;
+                string level;
+                int size, assoc;
+                cin >> level >> size >> assoc;
+
+                if (level == "L1") {
+                    l1_size = size;
+                    l1_assoc = assoc;
+                } else if (level == "L2") {
+                    l2_size = size;
+                    l2_assoc = assoc;
+                } else if (level == "L3") {
+                    l3_size = size;
+                    l3_assoc = assoc;
+                } else {
+                    cout << "Unknown cache level\n";
+                    continue;
+                }
+
+                cache.reinit(l1_size, l1_assoc, l2_size, l2_assoc, l3_size, l3_assoc);
             }
-            else if (type == "best_fit") \
+            else
             {
-                use_buddy = false;
-                current_allocator = BEST_FIT;
+                // allocator selection
+                if (target == "first_fit") {
+                    use_buddy = false;
+                    current_allocator = FIRST_FIT;
+                }
+                else if (target == "best_fit") {
+                    use_buddy = false;
+                    current_allocator = BEST_FIT;
+                }
+                else if (target == "worst_fit") {
+                    use_buddy = false;
+                    current_allocator = WORST_FIT;
+                }
+                else if (target == "buddy") {
+                    use_buddy = true;
+                }
+                else {
+                    cout << "Unknown set command\n";
+                }
             }
-            else if (type == "worst_fit") 
-            {
-                use_buddy = false;
-                current_allocator = WORST_FIT;
-            }
-            else if (type == "buddy") 
-            {
-                use_buddy = true;
-            }
-            else {
-                cout << "Unknown allocator type\n";
-            }
-            cout<<"Allocator set to "<<type<<endl;
         }
         else if(command=="stats")
         {
@@ -103,8 +129,8 @@ int main()
         else if(command == "access")
         {
             size_t vaddr;
-            total_memory_accesses++;
             cin >> hex >> vaddr >> dec;
+            total_memory_accesses++;
             size_t paddr = vm.translate(vaddr);
             cache.access(paddr);
         }
