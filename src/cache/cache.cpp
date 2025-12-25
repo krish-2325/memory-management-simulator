@@ -34,12 +34,12 @@ bool CacheLevel::access(size_t address)
     for (auto &line : set) {
         if (line.valid && line.tag == tag) {
             hits++;
-            line.last_used = fifo_tick; // For LRU
+            line.last_used = ++fifo_tick; // For LRU
             return true;
         }
     }
 
-    // MISS → FIFO replacement
+    // MISS → replacement (FIFO or LRU)
     misses++;
     fifo_tick++;
 
@@ -69,9 +69,12 @@ bool CacheLevel::access(size_t address)
 
 // ---------- CacheSystem ----------
 
-CacheSystem::CacheSystem(int l1_size, int l1_assoc, int l2_size, int l2_assoc)
+CacheSystem::CacheSystem(int l1_size, int l1_assoc,
+                         int l2_size, int l2_assoc,
+                         int l3_size, int l3_assoc)
     : L1(l1_size, 16, l1_assoc, LRU),
-      L2(l2_size, 16, l2_assoc, FIFO)
+      L2(l2_size, 16, l2_assoc, FIFO),
+      L3(l3_size, 16, l3_assoc, FIFO)
 {}
 
 void CacheSystem::access(size_t address)
@@ -83,6 +86,7 @@ void CacheSystem::access(size_t address)
         return;
 
     // Miss in both → main memory (simulated)
+    L3.access(address);
 }
 
 void CacheSystem::stats()
@@ -90,4 +94,5 @@ void CacheSystem::stats()
     cout << "\n--- Cache Statistics ---\n";
     cout << "L1 Hits: " << L1.hits << " Misses: " << L1.misses << endl;
     cout << "L2 Hits: " << L2.hits << " Misses: " << L2.misses << endl;
+    cout << "L3 Hits: " << L3.hits << " Misses: " << L3.misses << endl;
 }
