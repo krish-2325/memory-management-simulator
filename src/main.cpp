@@ -4,6 +4,7 @@
 #include <string>
 #include "common.h"
 #include "cache.h"
+#include "vm.h"
 
 using namespace std;
 
@@ -14,6 +15,7 @@ int next_block_id=1;
 int alloc_requests = 0;
 int alloc_success = 0;
 CacheSystem cache;
+VirtualMemory vm(8,256);
 enum AllocatorType { FIRST_FIT, BEST_FIT, WORST_FIT };
 AllocatorType current_allocator = FIRST_FIT;
 
@@ -306,13 +308,18 @@ int main()
         }
         else if(command == "access")
         {
-            size_t address;
-            cin >> hex >> address >> dec;
-            cache.access(address);
+            size_t vaddr;
+            cin >> hex >> vaddr >> dec;
+            size_t paddr = vm.translate(vaddr);
+            cache.access(paddr);
         }
         else if(command=="cache_stats")
         {
             cache.stats();
+        }
+        else if(command=="vm_stats")
+        {
+            vm.stats();
         }
         else
         {
