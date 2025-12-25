@@ -5,15 +5,21 @@ using namespace std;
 
 // ---------- CacheLevel ----------
 
-CacheLevel::CacheLevel(int s, int b, int a)
-    : size(s), block_size(b), associativity(a)
+CacheLevel::CacheLevel(int s, int b, int a, CachePolicy p)
+    : size(s), block_size(b), associativity(a), policy(p)
 {
     sets_count = size / (block_size * associativity);
     sets.resize(sets_count, vector<CacheLine>(associativity));
 
     for (auto &set : sets)
+    {
         for (auto &line : set)
+        {
             line.valid = false;
+            line.fifo_counter = 0;
+            line.last_used = 0;
+        }
+    }    
 }
 
 bool CacheLevel::access(size_t address)
@@ -28,6 +34,7 @@ bool CacheLevel::access(size_t address)
     for (auto &line : set) {
         if (line.valid && line.tag == tag) {
             hits++;
+            line.last_used = fifo_tick; // For LRU
             return true;
         }
     }
@@ -36,28 +43,35 @@ bool CacheLevel::access(size_t address)
     misses++;
     fifo_tick++;
 
-    CacheLine *victim = &set[0];
+    CacheLine *victim = nullptr;
+
     for (auto &line : set) {
         if (!line.valid) {
             victim = &line;
             break;
         }
-        if (line.fifo_counter < victim->fifo_counter)
+
+        if (!victim)
+            victim = &line;
+        else if (policy == FIFO && line.fifo_counter < victim->fifo_counter)
+            victim = &line;
+        else if (policy == LRU && line.last_used < victim->last_used)
             victim = &line;
     }
 
     victim->valid = true;
     victim->tag = tag;
     victim->fifo_counter = fifo_tick;
+    victim->last_used = fifo_tick;
 
     return false;
 }
 
 // ---------- CacheSystem ----------
 
-CacheSystem::CacheSystem()
-    : L1(64, 16, 1),    // 64B cache, 16B block, direct mapped
-      L2(256, 16, 2)    // 256B cache, 2-way
+CacheSystem::CacheSystem(int l1_size, int l1_assoc, int l2_size, int l2_assoc)
+    : L1(l1_size, 16, l1_assoc, LRU),
+      L2(l2_size, 16, l2_assoc, FIFO)
 {}
 
 void CacheSystem::access(size_t address)

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-CacheSystem cache;
+CacheSystem cache(64, 1, 256, 2); // CacheSystem(L1_size, L1_assoc, L2_size, L2_assoc)
 VirtualMemory vm(8,256);
 BuddyAllocator buddy(1024, 16);
 bool use_buddy = false;

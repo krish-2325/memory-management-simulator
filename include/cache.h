@@ -8,6 +8,12 @@ struct CacheLine {
     bool valid;
     size_t tag;
     int fifo_counter;
+    int last_used;
+};
+
+enum CachePolicy {
+    FIFO,
+    LRU
 };
 
 class CacheLevel {
@@ -22,8 +28,9 @@ public:
     int hits = 0;
     int misses = 0;
     int fifo_tick = 0;
+    CachePolicy policy;
 
-    CacheLevel(int size, int block_size, int associativity);
+    CacheLevel(int size, int block_size, int associativity, CachePolicy policy);
 
     bool access(size_t address);
 };
@@ -33,7 +40,7 @@ public:
     CacheLevel L1;
     CacheLevel L2;
 
-    CacheSystem();
+    CacheSystem(int l1_size, int l1_assoc, int l2_size, int l2_assoc);
 
     void access(size_t address);
     void stats();
