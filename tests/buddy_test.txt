@@ -1,0 +1,7 @@
+set buddy
+malloc 100
+malloc 200
+buddy_dump
+buddy_free 0x0000 128
+buddy_dump
+exit

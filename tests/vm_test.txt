@@ -1,0 +1,7 @@
+access 0x0100
+access 0x0200
+access 0x0300
+access 0x0100
+access 0x0400
+vm_stats
+exit

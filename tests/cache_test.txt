@@ -1,0 +1,7 @@
+access 0x0000
+access 0x0010
+access 0x0020
+access 0x0000
+access 0x0010
+cache_stats
+exit

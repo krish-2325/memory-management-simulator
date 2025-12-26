@@ -1,0 +1,10 @@
+init memory 1024
+set first_fit
+malloc 100
+malloc 200
+malloc 50
+dump
+free 2
+dump
+stats
+exit
