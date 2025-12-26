@@ -12,8 +12,11 @@ The design prioritizes correctness, modularity, and clarity over hardware-specif
 ## 2. Assumptions and Memory Model
 
 ### Memory Units
-- All memory sizes, addresses, and offsets are expressed in **bytes**.
-- Physical memory is modeled as a contiguous, byte-addressable region.
+- All memory units (addresses, sizes, offsets) are measured in **bytes**.
+- The simulator models a **single-process system**.
+- Physical memory is contiguous and byte-addressable.
+- Disk access latency for page faults is symbolic and not timed.
+- No real concurrency or scheduling is simulated.
 
 ### Scope
 - Single-process simulation
@@ -82,10 +85,10 @@ The simulator models a multilevel cache hierarchy:
 
 ### 6.2 Cache Parameters
 Each cache level has:
-- Configurable size
-- Fixed block size (16 bytes)
+- Configurable total size
+- Fixed block size of **16 bytes**
 - Configurable associativity
-- Replacement policy (FIFO or LRU)
+- A defined replacement policy (FIFO or LRU)
 
 Cache parameters can be reconfigured at runtime via CLI commands.
 
@@ -94,6 +97,18 @@ Cache parameters can be reconfigured at runtime via CLI commands.
 2. On miss, lookup in L2 cache
 3. On miss, lookup in L3 cache
 4. On miss, access main memory
+
+### Replacement Policy Choices
+
+The simulator implements the following cache replacement policies:
+- **LRU (Least Recently Used)** for L1 cache
+- **FIFO (First-In First-Out)** for L2 and L3 caches
+
+The **LFU (Least Frequently Used)** policy was intentionally not implemented.
+LFU requires maintaining long-term frequency counters, which increases
+state complexity and can cause cache pollution in short-lived workloads.
+LRU was chosen instead as it better reflects real CPU cache behavior
+and provides a clearer performance comparison.
 
 Each level tracks hit and miss statistics independently.
 
@@ -142,6 +157,22 @@ Virtual Address → Page Table → Physical Address → Cache Hierarchy → Main
 
 This mirrors real operating system memory access pipelines.
 
+### Memory Access Flow
+
+The simulator follows the sequence below for every memory access:
+
+Virtual Address
+    ↓
+Page Table Lookup
+    ↓
+Physical Address
+    ↓
+L1 Cache → L2 Cache → L3 Cache
+    ↓
+Main Memory
+
+This mirrors the behavior of a real operating system memory access pipeline.
+
 ---
 
 ## 10. Testing and Demonstration
@@ -153,6 +184,9 @@ Test workloads are provided in the `tests/` directory:
 - Buddy allocator tests
 
 Execution logs are stored in the `logs/` directory and serve as demonstration artifacts.
+
+Test correctness is validated by matching allocation layouts,
+cache hit/miss counts, and page fault statistics against expected behavior.
 
 ---
 
@@ -171,3 +205,5 @@ This simulator provides a clear and modular framework for understanding operatin
 memory management concepts. It demonstrates allocation strategies, caching behavior,
 virtual memory translation, and fragmentation trade-offs in a controlled user-space
 environment.
+This design emphasizes correctness, modularity, and transparency, making it
+suitable both as a teaching tool and as a demonstrative systems project.
