@@ -210,6 +210,11 @@ Each test file ends with the `exit` command to terminate the simulator cleanly.
 
 ---
 
+## Demo Video
+- https://drive.google.com/file/d/1RUmLKB4anCtkuH7xtBVgzpIG7t5mbBjK/view?usp=drive_link
+
+---
+
 ## Assumptions and Limitations
 - All memory units are expressed in **bytes**
 - Disk access latency is symbolic
